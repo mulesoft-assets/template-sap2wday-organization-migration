@@ -138,11 +138,17 @@
 			<url>https://repository.mulesoft.org/nexus/content/repositories/snapshots/</url>
 			<layout>default</layout>
 		</repository>
-	<repository>
+		<repository>
             <id>mule-ee-releases</id>
             <name>Mule Release Repository</name>
             <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases-ee/</url>
         </repository>
+        <repository>
+			<id>mule-ee-thirdparty</id>
+			<name>MuleSoft Thirdparty Repository</name>
+			<url>https://repository.mulesoft.org/nexus/content/repositories/thirdparty/</url>
+			<layout>default</layout>
+		</repository>        
     </repositories>	
 	<scm>
 		<connection>scm:git:https://github.com/mulesoft/template-sap2wday-organization-migration.git</connection>
