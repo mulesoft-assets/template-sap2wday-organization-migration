@@ -6,9 +6,11 @@
 
 package org.mule.templates.integration;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -22,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mule.MessageExchangePattern;
 import org.mule.api.MuleEvent;
+import org.mule.api.MuleException;
 import org.mule.api.registry.RegistrationException;
 import org.mule.context.notification.NotificationException;
 import org.mule.processor.chain.SubflowInterceptingChainLifecycleWrapper;
@@ -47,6 +50,9 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 	protected static final int TIMEOUT_SEC = 600;
 	private static final String PATH_TO_TEST_PROPERTIES = "./src/test/resources/mule.test.properties";
 	private String orgName;
+	private static final String SAP_INPUT_FILE = "./src/test/resources/sap-export.xml";
+	private static final String ORG_NAME = "ORG_NAME";
+		
 	
 	@Before
 	public void setUp() throws RegistrationException, NotificationException {
@@ -70,7 +76,7 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 		
 	@Test
 	public void testMainFlow() throws Exception {
-		runFlow("mainFlow");
+		runFlow("mainFlow", buildIDocRequest());
 
 		// Wait for the batch job executed by the poll flow to finish
 		helper.awaitJobTermination(TIMEOUT_SEC * 1000, 500);
@@ -80,8 +86,9 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 		MuleEvent result = flow.process(getTestEvent(prepareGet(), MessageExchangePattern.REQUEST_RESPONSE));
 		assertNotNull(result);
 		assertFalse(result.getMessage().getPayload() instanceof NullPayload);
-		OrganizationType org = (OrganizationType) result.getMessage().getPayload();
-		logger.info("wday org: " + org.getOrganizationData().getOrganizationName());
+		OrganizationType org = (OrganizationType) result.getMessage().getPayload();		
+		assertEquals("Workday organization name should be synced.", orgName, org.getOrganizationData().getOrganizationName());
+		
 	}
 
 	private OrganizationGetType prepareGet() {
@@ -103,4 +110,10 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 		return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
 	}
 
+	private String buildIDocRequest() throws MuleException, Exception {
+		String xml = org.apache.commons.io.IOUtils.toString(new FileInputStream(new File(SAP_INPUT_FILE)));
+		orgName = "orgMigration" + System.currentTimeMillis();
+			
+		return xml.replace(ORG_NAME, orgName);				
+	}
 }

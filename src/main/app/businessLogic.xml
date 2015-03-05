@@ -19,24 +19,11 @@ http://www.mulesoft.org/schema/mule/wd-hr http://www.mulesoft.org/schema/mule/wd
 http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
 http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/current/mule-sap.xsd">
     
-    <data-mapper:config name="XML_To_Map" transformationGraphPath="xml_to_map_1.grf" doc:name="XML_To_Map"/>
+    <data-mapper:config name="XML_To_Map" transformationGraphPath="xml_to_map_1.grf" doc:name="XML_To_Map"/>   
     <data-mapper:config name="organization_To_OrganizationAddUpdateType" transformationGraphPath="organization_to_organizationaddupdatetype.grf" doc:name="organization_To_OrganizationAddUpdateType"/>
+    
     <batch:job name="migrateOrganizationBatch" max-failed-records="-1">
-        <batch:threading-profile poolExhaustedAction="WAIT"/>
-        <batch:input>
-            <sap:outbound-endpoint connector-ref="SAP" type="function" xmlVersion="2" outputXml="true" responseTimeout="10000" doc:name="query SAP organizations" functionName="BAPI_PDOTYPES_GETDETAILEDLIST" exchange-pattern="request-response">
-                <sap:definition><![CDATA[<BAPI_PDOTYPES_GETDETAILEDLIST>
-<import>
-<OBJECTTYPE>O</OBJECTTYPE>
-<STARTDATE>${sap.startDate}</STARTDATE>
-<ENDDATE>${sap.endDate}</ENDDATE>
-</import>
-</BAPI_PDOTYPES_GETDETAILEDLIST>]]></sap:definition>
-            </sap:outbound-endpoint>
-            <data-mapper:transform config-ref="XML_To_Map" doc:name="XML To Map"/>
-
-
-        </batch:input>
+        <batch:threading-profile poolExhaustedAction="WAIT"/>        
         <batch:process-records>
 
             <batch:step name="upsertWorkdayOrganizationStep" accept-policy="ALL">
@@ -73,7 +60,8 @@ http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/
 
 This flow should control the direction of the application, and it should be called by the different endpoints that your Kick exposes to trigger it.
 
-">
+">		
+        <data-mapper:transform config-ref="XML_To_Map" doc:name="XML To Map"/>
         <batch:execute name="migrateOrganizationBatch" doc:name="trigger migrateUsersBatch"/>
         <exception-strategy ref="defaultChoiceExceptionStrategy" doc:name="catch Exception and call defaultChoiceExceptionStrategy"/>
    </flow>
