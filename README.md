@@ -64,6 +64,10 @@ The connector can either use RFC calls of BAPI functions and/or IDoc messages fo
 
 There are no particular considerations for this Anypoint Template regarding Workday as data destination.
 
+
+
+
+
 # Run it! <a name="runit"/>
 Simple steps to get SAP to Workday Organization Migration running.
 In any of the ways you would like to run this Template this is an example of the output you'll see after hitting the HTTP endpoint:
