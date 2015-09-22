@@ -41,6 +41,14 @@ Finally during the On Complete stage the Template will both output statistics da
 # Considerations <a name="considerations"/>
 
 To make this Anypoint Template run, there are certain preconditions that must be considered. All of them deal with the preparations in both, that must be made in order for all to run smoothly. **Failling to do so could lead to unexpected behavior of the template.**
+Before using this Anypoint Template, you may want to check out this [Documentation Page](http://www.mulesoft.org/documentation/display/current/SAP+Connector#SAPConnector-EnablingYourStudioProjectforSAP), that will teach you how to work 
+with SAP and Anypoint Studio.
+
+## Disclaimer
+This Anypoint template uses a few private Maven dependencies in oder to work. If you intend to run this template with Maven support, please continue reading.
+You will find that there are three dependencies in the pom.xml file that begin with the following group id: 
+	**com.sap.conn.jco** 
+These dependencies are private for Mulesoft and will cause you application not to build from a Maven command line. You need to replace them with "provided" scope and copy the libraries into the build path.
 
 
 ## SAP Considerations <a name="sapconsiderations"/>
@@ -76,11 +84,12 @@ In any of the ways you would like to run this Template this is an example of the
 <h1>Batch Process initiated</h1>
 <b>ID:</b>6eea3cc6-7c96-11e3-9a65-55f9f3ae584e<br/>
 <b>Records to Be Processed: </b>9<br/>
-<b>Start execution on: </b>Mon Jan 13 18:05:33 GMT-03:00 2014
+<b>Start execution on: </b>Mon Sep 21 18:05:33 GMT-03:00 2015
 </pre>
 
 ## Running on premise <a name="runonopremise"/>
-In this section we detail the way you should run your Anypoint Template on your computer.
+Fill in all the properties in one of the property files, for example in [mule.prod.properties](../blob/master/src/main/resources/mule.prod.properties) and run your app with the corresponding environment variable to use it. To follow the example, this will be `mule.env=prod`.
+After this, to trigger the use case you just need to hit the local http endpoint with the port you configured in your file. If this is, for instance, `9090` then you should hit: `http://localhost:9090/migrateorganizations` and this will create a CSV report and send it to the mails set.
 
 
 ### Where to Download Mule Studio and Mule ESB
@@ -127,10 +136,10 @@ Mule Studio provides you with really easy way to deploy your Template directly t
 In order to use this Mule Anypoint Template you need to configure properties (Credentials, configurations, etc.) either in properties file or in CloudHub as Environment Variables. Detail list with examples:
 ### Application configuration
 + http.port `9090` 
-+ sap.startDate `20140101`
-+ sap.endDate `20150101`
++ sap.startDate `20150101`
++ sap.endDate `20150901`
 
-*Note*:  sap.startDate and sap.endDate define a date range that is used for filtering SAP organizations. All organizations with a validity period overlaping with this date range are migrated. 
+**Note**: properties *sap.startDate* and *sap.endDate* define a date range that is used for filtering SAP organizations. All organizations with a validity period overlaping with this date range are migrated. 
 
 **SAP Connector configuration**
 
@@ -145,15 +154,12 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 
 + wday.user `user1@mulesoft_pt1`
 + wday.password `ExamplePassword565`
-+ wday.endpoint `https://services1.workday.com/ccx/service/acme/Human_Resources/v20`
++ wday.endpoint `https://services1.workday.com/ccx/service/acme/Human_Resources/v23.1`
 + wday.org.subtype `Company`
 + wday.org.visibility `Everyone`
-+ wday.supervisory.org.id `myOrg1234`
 + wday.ext.systemID `SAP sync`
-
-*Note*: You need to edit external ID for a supervisory Workday organization for this integration to function. Afterwards, use this ID as wday.supervisory.org.id and the corresponding System ID as wday.ext.systemID. 
  
-**SMPT Services configuration**
+**SMTP Services configuration**
 
 + smtp.host `smtp.gmail.com`
 + smtp.port `587`
@@ -199,14 +205,14 @@ This flow has Exception Strategy that basically consists on invoking the *defaul
 
 ## endpoints.xml<a name="endpointsxml"/>
 This is the file where you will find the inbound and outbound sides of your integration app.
-This Template has only an [HTTP Inbound Endpoint](http://www.mulesoft.org/documentation/display/current/HTTP+Endpoint+Reference) as the way to trigger the use case.
+This Template has only an [HTTP Listener Connector](http://www.mulesoft.org/documentation/display/current/HTTP+Listener+Connector) as the way to trigger the use case.
 
-**HTTP Inbound Endpoint** - Start Report Generation
+**HTTP Listener Connector** - Start Report Generation
 
 + `${http.port}` is set as a property to be defined either on a property file or in CloudHub environment variables.
 + The path configured by default is `migrateorganizations` and you are free to change for the one you prefer.
 + The host name for all endpoints in your CloudHub configuration should be defined as `localhost`. CloudHub will then route requests from your application domain URL to the endpoint.
-+ The endpoint is configured as a *request-response* since as a result of calling it the response will be the total of Organizations synced and filtered by the criteria specified.
++ The endpoint is a *request-response* since as a result of calling it the response will be the total of Organizations synced and filtered by the criteria specified.
 
 
 

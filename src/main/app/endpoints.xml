@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" xmlns:sap="http://www.mulesoft.org/schema/mule/sap"
-	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" version="EE-3.6.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
+<mule xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp"
+	xmlns:sap="http://www.mulesoft.org/schema/mule/sap"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans"
+	xmlns:core="http://www.mulesoft.org/schema/mule/core"
+	version="EE-3.7.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
@@ -9,7 +20,6 @@ http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/ba
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/current/mule-sap.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
-    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="${http.port}" doc:name="HTTP Listener Configuration"/>
 	
     <flow name="triggerFlow"  processingStrategy="synchronous">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/migrateorganizations" doc:name="start Organization synchronization"/>

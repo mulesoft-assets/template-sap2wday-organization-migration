@@ -1,42 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:sap="http://www.mulesoft.org/schema/mule/sap" xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp"
-	xmlns:wd-hr="http://www.mulesoft.org/schema/mule/wd-hr" xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
-	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
-      xmlns="http://www.mulesoft.org/schema/mule/core"
-      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-      xmlns:spring="http://www.springframework.org/schema/beans"
-      version="EE-3.6.0"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp"
+	xmlns:wd-hr="http://www.mulesoft.org/schema/mule/wd-hr" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.7.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
 http://www.mulesoft.org/schema/mule/wd-hr http://www.mulesoft.org/schema/mule/wd-hr/current/mule-wd-hr.xsd
-http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
-http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/current/mule-sap.xsd">
-    
-    <data-mapper:config name="XML_To_Map" transformationGraphPath="xml_to_map_1.grf" doc:name="XML_To_Map"/>   
-    <data-mapper:config name="organization_To_OrganizationAddUpdateType" transformationGraphPath="organization_to_organizationaddupdatetype.grf" doc:name="organization_To_OrganizationAddUpdateType"/>
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
     
     <batch:job name="migrateOrganizationBatch" max-failed-records="-1">
-        <batch:threading-profile poolExhaustedAction="WAIT"/>        
+        <batch:threading-profile poolExhaustedAction="WAIT"/>
+        <batch:input>
+            <dw:transform-message doc:name="XML To Map">
+                <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload.BAPI_PDOTYPES_GETDETAILEDLIST.tables.OBJECTS.*row map
+{
+	name: $.LONG_TEXT,
+	code: $.SHORT_TEXT,
+	id: $.OBJECT_ID
+}]]></dw:set-payload>
+            </dw:transform-message>
+        </batch:input>        
         <batch:process-records>
 
-            <batch:step name="upsertWorkdayOrganizationStep" accept-policy="ALL">
+            <batch:step name="upsertWorkdayOrganizationStep" accept-policy="ALL" >
                 <logger message="Organization to upsert: #[payload]" level="INFO" doc:name="Log the organization"/>
-                <data-mapper:transform config-ref="organization_To_OrganizationAddUpdateType" doc:name="organization To OrganizationAddUpdateType">
-                    <data-mapper:input-arguments>
-                        <data-mapper:input-argument key="systemId">${wday.ext.systemID}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="subtype">${wday.org.subtype}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="supervisoryOrgId">${wday.supervisory.org.id}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="visibility">${wday.org.visibility}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="supervisoryOrgSystemId">${wday.ext.systemID}</data-mapper:input-argument>
-                    </data-mapper:input-arguments>
-                </data-mapper:transform>
+
+                <dw:transform-message doc:name="Create AddUpdateOrganization Request">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+	organizationData: {
+		availabilityDate: now as :datetime {class: 'java.util.Calendar'},
+		integrationIDData: {
+			ID: [{
+				systemID: p('wday.ext.systemID'),
+				value: payload.id
+			}]
+		},
+		organizationCode: payload.code,
+		organizationName: payload.name,
+		organizationSubtypeReference: {
+			organizationSubtypeName: p('wday.org.subtype')
+		},
+		organizationTypeReference: {
+			organizationTypeName: "Company"
+		},
+		organizationVisibilityReference: {
+			organizationVisibilityName: p('wday.org.visibility')
+		}
+	}
+} as :object {
+	class : "com.workday.hr.OrganizationAddUpdateType"
+}]]></dw:set-payload>
+                </dw:transform-message>
+
                 <wd-hr:add-update-organization config-ref="Workday_Human_Resource" doc:name="upsert Workday organization"/>
             </batch:step>
         </batch:process-records>
@@ -61,8 +90,7 @@ http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/
 This flow should control the direction of the application, and it should be called by the different endpoints that your Kick exposes to trigger it.
 
 ">		
-        <data-mapper:transform config-ref="XML_To_Map" doc:name="XML To Map"/>
-        <batch:execute name="migrateOrganizationBatch" doc:name="trigger migrateUsersBatch"/>
+        <batch:execute name="migrateOrganizationBatch" doc:name="trigger migrateOrganizationBatch"/>
         <exception-strategy ref="defaultChoiceExceptionStrategy" doc:name="catch Exception and call defaultChoiceExceptionStrategy"/>
    </flow>
     

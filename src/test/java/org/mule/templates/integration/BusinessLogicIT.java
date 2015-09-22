@@ -12,13 +12,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.io.InputStream;
 import java.util.Properties;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,15 +21,13 @@ import org.mule.MessageExchangePattern;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.registry.RegistrationException;
+import org.mule.construct.Flow;
 import org.mule.context.notification.NotificationException;
 import org.mule.processor.chain.SubflowInterceptingChainLifecycleWrapper;
+import org.mule.transformer.types.DataTypeFactory;
 import org.mule.transport.NullPayload;
 
 import com.mulesoft.module.batch.BatchTestHelper;
-import com.workday.hr.ExternalIntegrationIDReferenceDataType;
-import com.workday.hr.IDType;
-import com.workday.hr.OrganizationGetType;
-import com.workday.hr.OrganizationReferenceType;
 import com.workday.hr.OrganizationType;
 
 /**
@@ -43,16 +36,16 @@ import com.workday.hr.OrganizationType;
  * 
  */
 public class BusinessLogicIT extends AbstractTemplateTestCase {
-
-	private static String WDAY_SYSTEM_ID;
-	private static String SAP_ORG_ID;
-	private BatchTestHelper helper;
+	
 	protected static final int TIMEOUT_SEC = 600;
 	private static final String PATH_TO_TEST_PROPERTIES = "./src/test/resources/mule.test.properties";
-	private String orgName;
 	private static final String SAP_INPUT_FILE = "./src/test/resources/sap-export.xml";
 	private static final String ORG_NAME = "ORG_NAME";
-		
+	private static final String ORG_CODE = "ORG_CODE";
+	private Flow mainFlow;
+	private String orgName;
+	private String orgCode;
+	private BatchTestHelper helper;
 	
 	@Before
 	public void setUp() throws RegistrationException, NotificationException {
@@ -63,57 +56,35 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
     		props.load(new FileInputStream(PATH_TO_TEST_PROPERTIES));
     	} catch (Exception e) {
     	   logger.error("Error occured while reading mule.test.properties", e);
-    	} 
-    	WDAY_SYSTEM_ID = props.getProperty("wday.ext.systemID");
-    	SAP_ORG_ID = props.getProperty("sap.testorg.id");
+    	}
     	
-		updateSAPTestData();
-	}
-
-	private void updateSAPTestData() {
-		orgName = TEMPLATE_NAME + System.currentTimeMillis();	
+    	mainFlow =  (Flow) muleContext.getRegistry().lookupObject("mainFlow");
 	}
 		
 	@Test
 	public void testMainFlow() throws Exception {
-		runFlow("mainFlow", buildIDocRequest());
+		final MuleEvent testEvent = getTestEvent(null, mainFlow);
+		testEvent.getMessage().setPayload(buildIDocRequest(), DataTypeFactory.create(InputStream.class, "application/xml"));
+		mainFlow.process(testEvent);
 
 		// Wait for the batch job executed by the poll flow to finish
 		helper.awaitJobTermination(TIMEOUT_SEC * 1000, 500);
 		helper.assertJobWasSuccessful();
 		
 		SubflowInterceptingChainLifecycleWrapper flow = getSubFlow("getOrganization");
-		MuleEvent result = flow.process(getTestEvent(prepareGet(), MessageExchangePattern.REQUEST_RESPONSE));
+		MuleEvent result = flow.process(getTestEvent(null, MessageExchangePattern.REQUEST_RESPONSE));
 		assertNotNull(result);
 		assertFalse(result.getMessage().getPayload() instanceof NullPayload);
 		OrganizationType org = (OrganizationType) result.getMessage().getPayload();		
 		assertEquals("Workday organization name should be synced.", orgName, org.getOrganizationData().getOrganizationName());
-		
-	}
-
-	private OrganizationGetType prepareGet() {
-		OrganizationGetType get = new OrganizationGetType();
-		OrganizationReferenceType ref = new OrganizationReferenceType();
-		ExternalIntegrationIDReferenceDataType extId = new ExternalIntegrationIDReferenceDataType();
-		IDType id = new IDType();
-		id.setSystemID(WDAY_SYSTEM_ID);
-		id.setValue(SAP_ORG_ID);
-		extId.setID(id );
-		ref.setIntegrationIDReference(extId);
-		get.setOrganizationReference(ref );
-		return get ;
-	}
-	
-	private static XMLGregorianCalendar xmlDate(Date date) throws DatatypeConfigurationException {
-		GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
-		gregorianCalendar.setTime(date);
-		return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+		assertEquals("Workday organization code should be synced.", orgCode, org.getOrganizationData().getOrganizationCode());
 	}
 
 	private String buildIDocRequest() throws MuleException, Exception {
 		String xml = org.apache.commons.io.IOUtils.toString(new FileInputStream(new File(SAP_INPUT_FILE)));
-		orgName = "orgMigration" + System.currentTimeMillis();
+		orgName = "orgMigrationName" + System.currentTimeMillis();
+		orgCode = "orgMigrationCode" + System.currentTimeMillis();
 			
-		return xml.replace(ORG_NAME, orgName);				
+		return xml.replace(ORG_NAME, orgName).replace(ORG_CODE, orgCode);				
 	}
 }
