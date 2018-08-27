@@ -52,6 +52,8 @@ http://www.mulesoft.org/schema/mule/workday http://www.mulesoft.org/schema/mule/
 	<configuration-properties file="mule.${mule.env}.properties"
 		doc:name="Configuration properties" doc:id="674beef8-9485-40a7-99b9-0685c9b7e863" />
 
+	<global-property doc:name="Global Property" name="mule.env"
+		value="dev" />
 </mule>
 
 
