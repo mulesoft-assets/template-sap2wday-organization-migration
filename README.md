@@ -11,9 +11,9 @@ This template is subject to the conditions of the <a href="https://s3.amazonaws.
 <!-- Use Case (start) -->
 As a SAP admin I want to migrate organizations to Workday instance.
 
-This Template should serve as a foundation for the process of migrating organizations from SAP instance to Workday one, being able to match organizations by Integration ID. 
+This template serves as a foundation for the process of migrating organizations from SAP instance to Workday one, being able to match organizations by Integration ID. 
 
-As implemented, this Template leverages the [Batch Module](http://www.mulesoft.org/documentation/display/current/Batch+Processing).
+As implemented, this Template leverages the Mule batch module.
 The batch job is divided in Process and On Complete stages.
 
 During the Input stage the Template will go to the SAP system and query all the existing Organizations that match the filtering criteria.
@@ -28,8 +28,8 @@ Finally during the On Complete stage the Template will both output statistics da
 <!-- Default Considerations (end) -->
 
 <!-- Considerations (start) -->
-To make this Anypoint Template run, there are certain preconditions that must be considered. All of them deal with the preparations in both, that must be made in order for all to run smoothly. **Failing to do so could lead to unexpected behavior of the template.**
-Before using this Anypoint Template, you may want to check out this [Documentation Page](http://www.mulesoft.org/documentation/display/current/SAP+Connector#SAPConnector-EnablingYourStudioProjectforSAP), that will teach you how to work 
+To make this template run, there are certain preconditions that must be considered. All of them deal with the preparations in both, that must be made for the template to run smoothly. **Failing to do so could lead to unexpected behavior of the template.**
+Before using this template, you may want to check out this [Documentation Page](http://www.mulesoft.org/documentation/display/current/SAP+Connector#SAPConnector-EnablingYourStudioProjectforSAP), that will teach you how to work 
 with SAP and Anypoint Studio.
 
 ## Disclaimer
@@ -65,7 +65,7 @@ There are no considerations with using Workday as a data destination.
 # Run it!
 Simple steps to get this template running.
 <!-- Run it (start) -->
-In any of the ways you would like to run this Template this is an example of the output you'll see after hitting the HTTP endpoint:
+In any of the ways you would like to run this Template this is an example of the output you'll see after browse toting the HTTP endpoint:
 
 {
     "Message": "Batch Process initiated",
@@ -77,7 +77,7 @@ In any of the ways you would like to run this Template this is an example of the
 
 ## Running On Premises
 Fill in all the properties in one of the property files, for example in [mule.prod.properties](../blob/master/src/main/resources/mule.prod.properties) and run your app with the corresponding environment variable to use it. To follow the example, this will be `mule.env=prod`.
-After this, to trigger the use case you just need to hit the local http endpoint with the port you configured in your file. If this is, for instance, `9090` then you should hit: `http://localhost:9090/migrateorganizations` and this will create a CSV report and send it to the mails set.
+After this, to trigger the use case you just need to browse to the local http endpoint with the port you configured in your file. If this is, for instance, `9090` then you should browse to: `http://localhost:9090/migrateorganizations` and this will create a CSV report and send it to the mails set.
 <!-- Running on premise (start) -->
 
 <!-- Running on premise (end) -->
@@ -120,7 +120,7 @@ Update the properties in one of the property files, for example in mule.prod.pro
 ## Running on CloudHub
 When creating your application in CloudHub, go to Runtime Manager > Manage Application > Properties to set the environment variables listed in "Properties to Configure" as well as the mule.env value.
 <!-- Running on Cloudhub (start) -->
-Once your app is all set and started, supposing you choose as domain name `sapwdayorganizationmigration` to trigger the use case you just need to hit `http://sapwdayorganizationmigration.cloudhub.io/migrateorganizations` and report will be sent to the email configured.
+Once your app is all set and started, supposing you choose as domain name `sapwdayorganizationmigration` to trigger the use case you just need to browse to `http://sapwdayorganizationmigration.cloudhub.io/migrateorganizations` and report will be sent to the email configured.
 <!-- Running on Cloudhub (end) -->
 
 ### Deploying a Template in CloudHub
@@ -136,7 +136,7 @@ To use this template, configure properties such as credentials, configurations, 
 + http.port `9090`
 + page.size `100` 
 
-**SAP Connector configuration**
+**SAP Connector Configuration**
 
 + sap.jco.ashost `your.sap.address.com`
 + sap.jco.user `SAP_USER`
@@ -150,7 +150,7 @@ To use this template, configure properties such as credentials, configurations, 
 + sap.endDate `20150901`
 **Note**: properties *sap.startDate* and *sap.endDate* define a date range that is used for filtering SAP organizations. All organizations with a validity period overlaping with this date range are migrated. 
 
-**WorkDay Connector configuration**
+**WorkDay Connector Configuration**
 
 + wday.username `user1@mulesoft_pt1`
 + wday.password `ExamplePassword565`
@@ -160,7 +160,7 @@ To use this template, configure properties such as credentials, configurations, 
 + wday.org.visibility `Everyone`
 + wday.ext.systemID `SAP sync`
  
-**SMTP Services configuration**
+**SMTP Services Configuration**
 
 + smtp.host `smtp.gmail.com`
 + smtp.port `465`
@@ -176,7 +176,7 @@ To use this template, configure properties such as credentials, configurations, 
 
 # API Calls
 <!-- API Calls (start) -->
-There are no particular considerations for this Anypoint Template regarding API calls.
+There are no particular considerations for this template regarding API calls.
 <!-- API Calls (end) -->
 
 # Customize It!
@@ -200,7 +200,7 @@ This file provides the configuration for connectors and configuration properties
 ## businessLogic.xml
 <!-- Default Business Logic XML (start) -->
 Functional aspect of the Template is implemented on this XML, directed by one flow responsible of excecuting the logic.
-For the pourpose of this particular Template the *mainFlow* just excecutes a [Batch Job](http://www.mulesoft.org/documentation/display/current/Batch+Processing). which handles all the logic of it.<!-- Default Business Logic XML (end) -->
+For the pourpose of this particular Template the *mainFlow* just excecutes a batch job. which handles all the logic of it.<!-- Default Business Logic XML (end) -->
 
 <!-- Business Logic XML (start) -->
 
@@ -209,7 +209,7 @@ For the pourpose of this particular Template the *mainFlow* just excecutes a [Ba
 ## endpoints.xml
 <!-- Default Endpoints XML (start) -->
 This is the file where you will find the inbound and outbound sides of your integration app.
-This Template has only an [HTTP Listener Connector](http://www.mulesoft.org/documentation/display/current/HTTP+Listener+Connector) as the way to trigger the use case.
+This Template has only an HTTP Listener as the way to trigger the use case.
 
 **HTTP Listener Connector** - Start Report Generation
 
