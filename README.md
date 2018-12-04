@@ -2,6 +2,13 @@
 # Anypoint Template: SAP to Workday Organization Migration	
 
 <!-- Header (start) -->
+Moves a large set of organizations from SAP to Workday. You can trigger this manually or programmatically with an HTTP call. Organizations are upserted so that the migration can be run multiple times without worrying about creating duplicates. This template uses batch to efficiently process many records at a time.
+
+![d4742a57-80f3-493a-ad79-189e50faeb7d-image.png](https://exchange2-file-upload-service-kprod.s3.us-east-1.amazonaws.com:443/d4742a57-80f3-493a-ad79-189e50faeb7d-image.png)
+
+## Workday Requirement
+
+Install Workday HCM, the Human Resources module via the [Workday connector](https://www.mulesoft.com/exchange/com.mulesoft.connectors/mule-workday-connector/).
 
 <!-- Header (end) -->
 
@@ -9,33 +16,26 @@
 This template is subject to the conditions of the <a href="https://s3.amazonaws.com/templates-examples/AnypointTemplateLicense.pdf">MuleSoft License Agreement</a>. Review the terms of the license before downloading and using this template. You can use this template for free with the Mule Enterprise Edition, CloudHub, or as a trial in Anypoint Studio. 
 # Use Case
 <!-- Use Case (start) -->
-As a SAP admin I want to migrate organizations to Workday instance.
+As a SAP admin I want to migrate organizations to a Workday instance.
 
 This template serves as a foundation for the process of migrating organizations from SAP instance to Workday one, being able to match organizations by Integration ID. 
 
-As implemented, this Template leverages the Mule batch module.
-The batch job is divided in Process and On Complete stages.
+As implemented, this template leverages the Mule batch module. The batch job is divided into the Process and On Complete stages.
 
-During the Input stage the Template will go to the SAP system and query all the existing Organizations that match the filtering criteria.
-The last step of the Process stage will insert or update organizations in Workday, added under a specified organization in the Workday organization hierarchy.
+During the input stage the template goes to the SAP system and queries all the existing organizations that match the filtering criteria.
 
-Finally during the On Complete stage the Template will both output statistics data into the console and send a notification email with the results of the batch execution.
+The last step of the Process stage inserts or updates organizations in Workday, added under a specified organization in the Workday organization hierarchy.
+
+Finally during the On Complete stage the template outputs statistic data in the console and sends an email notification  with the results of the batch execution.
 <!-- Use Case (end) -->
 
 # Considerations
-<!-- Default Considerations (start) -->
-
-<!-- Default Considerations (end) -->
-
-<!-- Considerations (start) -->
-To make this template run, there are certain preconditions that must be considered. All of them deal with the preparations in both, that must be made for the template to run smoothly. **Failing to do so could lead to unexpected behavior of the template.**
-Before using this template, you may want to check out this [Documentation Page](http://www.mulesoft.org/documentation/display/current/SAP+Connector#SAPConnector-EnablingYourStudioProjectforSAP), that will teach you how to work 
-with SAP and Anypoint Studio.
+<!-- Default Considerations (start) --><!-- Default Considerations (end) --><!-- Considerations (start) -->
+To make this template run, there are certain preconditions that must be considered that deal with the preparations in both, that must be made for the template to run smoothly. Failing to do so could lead to unexpected behavior of the template. Before using this template, see [Install the SAP Connector in Studio](https://docs.mulesoft.com/connectors/sap/sap-connector#install-the-sap-connector-in-studio), for installing the SAP connector in Anypoint Studio.
 
 ## Disclaimer
-This Anypoint template uses a few private Maven dependencies from Mulesoft in order to work. If you intend to run this template with Maven support, you need to add three extra dependencies for SAP to the pom.xml file.
+This template uses a few private Maven dependencies from Mulesoft to work. If you intend to run this template with Maven support, you need to add extra dependencies for SAP to the pom.xml file.
 <!-- Considerations (end) -->
-
 
 ## SAP Considerations
 
@@ -45,27 +45,16 @@ Here's what you need to know to get this template to work with SAP.
 
 The SAP backend system is used as a source of data. The SAP connector is used to send and receive the data from the SAP backend. The connector can either use RFC calls of BAPI functions and/or IDoc messages for data exchange, and needs to be properly customized per the "Properties to Configure" section.
 
-
-
-
-
-
 ## Workday Considerations
-
 
 ### As a Data Destination
 
 There are no considerations with using Workday as a data destination.
 
-
-
-
-
-
 # Run it!
 Simple steps to get this template running.
 <!-- Run it (start) -->
-In any of the ways you would like to run this Template this is an example of the output you'll see after browse toting the HTTP endpoint:
+This is an example of the output you see after browsing to the HTTP endpoint:
 
 {
     "Message": "Batch Process initiated",
@@ -76,8 +65,9 @@ In any of the ways you would like to run this Template this is an example of the
 <!-- Run it (end) -->
 
 ## Running On Premises
-Fill in all the properties in one of the property files, for example in [mule.prod.properties](../blob/master/src/main/resources/mule.prod.properties) and run your app with the corresponding environment variable to use it. To follow the example, this will be `mule.env=prod`.
-After this, to trigger the use case you just need to browse to the local http endpoint with the port you configured in your file. If this is, for instance, `9090` then you should browse to: `http://localhost:9090/migrateorganizations` and this will create a CSV report and send it to the mails set.
+Fill in all the properties in one of the property files, for example in mule.prod.properties and run your app with the corresponding environment variable to use it. To follow the example, use `mule.env=prod`.
+
+After this, to trigger the use case you just need to browse to the local HTTP endpoint with the port you configured in your file. If the port is, for instance, `9090` then browse to: `http://localhost:9090/migrateorganizations`. Browsing to this endpoint causes the template to create a CSV report and send it to the email address you set.
 <!-- Running on premise (start) -->
 
 <!-- Running on premise (end) -->
@@ -102,13 +92,13 @@ In Studio, click the Exchange X icon in the upper left of the taskbar, log in wi
 ### Running on Studio
 After you import your template into Anypoint Studio, follow these steps to run it:
 
-+ Locate the properties file `mule.dev.properties`, in src/main/resources.
-+ Complete all the properties required as per the examples in the "Properties to Configure" section.
-+ Right click the template project folder.
-+ Hover your mouse over `Run as`.
-+ Click `Mule Application (configure)`.
-+ Inside the dialog, select Environment and set the variable `mule.env` to the value `dev`.
-+ Click `Run`.
+. Locate the properties file `mule.dev.properties`, in src/main/resources.
+. Complete all the properties required as per the examples in the "Properties to Configure" section.
+. Right click the template project folder.
+. Hover your mouse over `Run as`.
+. Click `Mule Application (configure)`.
+. Inside the dialog, select Environment and set the variable `mule.env` to the value `dev`.
+. Click `Run`.
 <!-- Running on Studio (start) -->
 
 <!-- Running on Studio (end) -->
@@ -120,7 +110,7 @@ Update the properties in one of the property files, for example in mule.prod.pro
 ## Running on CloudHub
 When creating your application in CloudHub, go to Runtime Manager > Manage Application > Properties to set the environment variables listed in "Properties to Configure" as well as the mule.env value.
 <!-- Running on Cloudhub (start) -->
-Once your app is all set and started, supposing you choose as domain name `sapwdayorganizationmigration` to trigger the use case you just need to browse to `http://sapwdayorganizationmigration.cloudhub.io/migrateorganizations` and report will be sent to the email configured.
+Once your app is all set and started, if you choose as the domain name `sapwdayorganizationmigration` to trigger the use case, you just need to browse to `http://sapwdayorganizationmigration.cloudhub.io/migrateorganizations` and the output report is sent to the email address you configure.
 <!-- Running on Cloudhub (end) -->
 
 ### Deploying a Template in CloudHub
@@ -185,13 +175,15 @@ This brief guide provides a high level understanding of how this template is bui
 * config.xml
 * businessLogic.xml
 * endpoints.xml
-* errorHandling.xml<!-- Customize it (start) -->
+* errorHandling.xml
+<!-- Customize it (start) -->
 
 <!-- Customize it (end) -->
 
 ## config.xml
 <!-- Default Config XML (start) -->
-This file provides the configuration for connectors and configuration properties. Only change this file to make core changes to the connector processing logic. Otherwise, all parameters that can be modified should instead be in a properties file, which is the recommended place to make changes.<!-- Default Config XML (end) -->
+This file provides the configuration for connectors and configuration properties. Only change this file to make core changes to the connector processing logic. Otherwise, all parameters that can be modified should instead be in a properties file, which is the recommended place to make changes.
+<!-- Default Config XML (end) -->
 
 <!-- Config XML (start) -->
 
@@ -199,8 +191,8 @@ This file provides the configuration for connectors and configuration properties
 
 ## businessLogic.xml
 <!-- Default Business Logic XML (start) -->
-Functional aspect of the Template is implemented on this XML, directed by one flow responsible of excecuting the logic.
-For the pourpose of this particular Template the *mainFlow* just excecutes a batch job. which handles all the logic of it.<!-- Default Business Logic XML (end) -->
+Functional aspects of this template are implemented in this XML file, directed by a flow responsible for executing the logic. For the purpose of this template the *mainFlow* just excecutes a batch job, which handles all its logic.
+<!-- Default Business Logic XML (end) -->
 
 <!-- Business Logic XML (start) -->
 
@@ -208,15 +200,16 @@ For the pourpose of this particular Template the *mainFlow* just excecutes a bat
 
 ## endpoints.xml
 <!-- Default Endpoints XML (start) -->
-This is the file where you will find the inbound and outbound sides of your integration app.
-This Template has only an HTTP Listener as the way to trigger the use case.
+This is the file where you find the inbound and outbound sides of your integration app.
+This template has only an HTTP Listener as the way to trigger the use case.
 
 **HTTP Listener Connector** - Start Report Generation
 
 + `${http.port}` is set as a property to be defined either on a property file or in CloudHub environment variables.
 + The path configured by default is `migrateorganizations` and you are free to change for the one you prefer.
-+ The host name for all endpoints in your CloudHub configuration should be defined as `localhost`. CloudHub will then route requests from your application domain URL to the endpoint.
-+ The endpoint is a *request-response* since as a result of calling it the response will be the total of Organizations synced and filtered by the criteria specified.<!-- Default Endpoints XML (end) -->
++ The host name for all endpoints in your CloudHub configuration should be defined as `localhost`. CloudHub then routes requests from your application domain URL to the endpoint.
++ The endpoint is a *request-response* as a result of calling it causes the response to be the total of organizations synced and filtered by the criteria specified.
+<!-- Default Endpoints XML (end) -->
 
 <!-- Endpoints XML (start) -->
 
@@ -224,7 +217,8 @@ This Template has only an HTTP Listener as the way to trigger the use case.
 
 ## errorHandling.xml
 <!-- Default Error Handling XML (start) -->
-This file handles how your integration reacts depending on the different exceptions. This file provides error handling that is referenced by the main flow in the business logic.<!-- Default Error Handling XML (end) -->
+This file handles how your integration reacts depending on the different exceptions. This file provides error handling that is referenced by the main flow in the business logic.
+<!-- Default Error Handling XML (end) -->
 
 <!-- Error Handling XML (start) -->
 
