@@ -5,8 +5,7 @@
 	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:email="http://www.mulesoft.org/schema/mule/email"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
@@ -14,40 +13,6 @@ http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/
 http://www.mulesoft.org/schema/mule/workday http://www.mulesoft.org/schema/mule/workday/current/mule-workday.xsd">
 
 	<flow name="businessLogicFlow" doc:id="884f86c5-66e1-4701-bb9b-594c2a60abf3">
-		<ee:transform doc:name="Set XML input"
-			doc:id="15a322b0-102e-4716-b0da-1c05da3e2e4b">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/xml
----
-{
-  "BAPI_PDOTYPES_GETDETAILEDLIST": {
-    "import": {
-      "OBJECTTYPE": "O",
-      "STARTDATE": p('sap.startDate'),
-      "ENDDATE": p('sap.endDate'),
-    }
-  }
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<sap:execute-synchronous-remote-function-call
-			doc:name="Execute BAPI / Function over sRFC" doc:id="5b08fe8d-f689-4fb1-9a03-61d564cfc863"
-			config-ref="SAP_Outbound" key="/migrateorganizations" />
-		<ee:transform doc:name="convert SAP response to Workday Account"
-			doc:id="a1dc2edd-31bf-4ad8-8575-390625caf768">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-payload.BAPI_PDOTYPES_GETDETAILEDLIST.tables.OBJECTS.*row map
-{
-	name: $.LONG_TEXT,
-	code: $.SHORT_TEXT,
-	id: $.OBJECT_ID
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
 
 		<batch:job jobName="migrateObjectsBatch" doc:id="79b373e6-1aeb-43a9-9dfe-8ac0d2f31fdc"
 			blockSize="${page.size}">
@@ -85,9 +50,7 @@ ns ns0 urn:com.workday/bsvc
 }]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
-					<workday:invoke doc:name="upsert Workday organization"
-						doc:id="28ea1227-0b55-4eac-924b-e081fbde2ec7" config-ref="Workday_Config"
-						service="Human_Resources" operation="Add_Update_Organization" />
+					<workday:human-resources operation="Add_Update_Organization" doc:name="Upsert Workday organization" doc:id="936cb086-c11e-49ad-9ee2-fd9012d6f2f0" config-ref="Workday_Config" />	
 					<logger level="INFO" doc:name="Upsert result"
 						doc:id="b1ff833e-763d-4241-bf30-69e0e2ce04f0" message="#[output application/json --- payload ]" />
 				</batch:step>
@@ -129,8 +92,41 @@ ns ns0 urn:com.workday/bsvc
 			</batch:on-complete>
 		</batch:job>
 	</flow>
+	<sub-flow name="queryFromSAPSubFlow" doc:id="6a238565-9508-4e93-86f0-dcdd7b25a0ed">
+		<ee:transform doc:name="Set XML input" doc:id="15a322b0-102e-4716-b0da-1c05da3e2e4b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  "BAPI_PDOTYPES_GETDETAILEDLIST": {
+    "import": {
+      "OBJECTTYPE": "O",
+      "STARTDATE": p('sap.startDate'),
+      "ENDDATE": p('sap.endDate'),
+    }
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<sap:execute-synchronous-remote-function-call doc:name="Execute BAPI / Function over sRFC" doc:id="5b08fe8d-f689-4fb1-9a03-61d564cfc863" config-ref="SAP_Outbound" key="/migrateorganizations" />
+		<ee:transform doc:name="Convert SAP response to Workday Account" doc:id="a1dc2edd-31bf-4ad8-8575-390625caf768">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.BAPI_PDOTYPES_GETDETAILEDLIST.tables.OBJECTS.*row map
+{
+	name: $.LONG_TEXT,
+	code: $.SHORT_TEXT,
+	id: $.OBJECT_ID
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
 	<flow name="mainFlow" doc:id="7c0a5bef-b3d5-442f-bff3-10d038f69a5e">
-		<flow-ref doc:name="businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0"
+		<flow-ref doc:name="Reference to queryFromSAPSubFlow" doc:id="361c9abe-fc4a-4c21-b0e4-6375562ef5da" name="queryFromSAPSubFlow"/>
+		<flow-ref doc:name="Reference to businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0"
 			name="businessLogicFlow" />
 		<error-handler>
 			<on-error-propagate enableNotifications="true"
