@@ -1,27 +1,27 @@
 <?xml version='1.0' encoding='utf-8'?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:sap="http://www.mulesoft.org/schema/mule/sap" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:workday="http://www.mulesoft.org/schema/mule/workday" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/sap http://www.mulesoft.org/schema/mule/sap/current/mule-sap.xsd http://www.mulesoft.org/schema/mule/workday http://www.mulesoft.org/schema/mule/workday/current/mule-workday.xsd">
-	
+
 	<global-property name="mule.env" value="dev" doc:name="Global Property" />
-	
+
 	<configuration-properties file="common.properties" doc:id="70e3f9bb-7dcc-4315-b015-695cdf8e09ad" doc:name="Configuration properties" />
 	<configuration-properties file="mule.${mule.env}.properties" doc:id="3023c011-a7a9-49f5-a704-bae84bcac070" doc:name="Configuration properties" />
-	
+
 	<http:listener-config name="HTTP_Listener_config" doc:id="d1d0024c-5819-4b00-bfd1-7108541031fc" doc:name="HTTP Listener config">
 		<http:listener-connection host="0.0.0.0" port="${http.port}" />
 	</http:listener-config>
-	
+
 	<sap:outbound-config name="SAP_Outbound" doc:id="a1a8842e-826a-4997-9c81-704ad29638d3" doc:name="SAP Outbound">
 		<sap:simple-connection-provider-connection applicationServerHost="${sap.jco.ashost}" client="${sap.jco.client}" language="${sap.jco.lang}" password="${sap.jco.passwd}" systemNumber="${sap.jco.sysnr}" username="${sap.jco.user}" />
 	</sap:outbound-config>
-	
+
 	<workday:config-version-30-config name="Workday_Config" doc:name="Workday Config version 30" doc:id="f15ff7b0-0069-482d-b89d-d39648d7ec6d">
-        <workday:basic-authentication-api-v30-connection username="${wday.username}" password="${wday.password}" tenantName="${wday.tenant}" hostName="${wday.host}" responseTimeout="25000"/>
+        <workday:basic-authentication-api-v30-connection username="${wday.username}" password="${wday.password}" tenantName="${wday.tenant}" hostName="${wday.host}" responseTimeout="${wday.responseTimeout}"/>
     </workday:config-version-30-config>
 
 	<email:smtp-config name="Gmail_SMTP" doc:id="8ba14ccd-a5b8-43a8-8281-cd433c852f2b" doc:name="Email SMTP">
 		<email:smtps-connection host="${smtp.host}" password="${smtp.password}" port="${smtp.port}" tlsContext="TLS_Context" user="${smtp.user}" />
 	</email:smtp-config>
-	
+
 	<tls:context name="TLS_Context" doc:id="233e532c-8296-4ddd-ac67-e2b7984b3609" doc:name="TLS Context">
 		<tls:trust-store insecure="true" />
 	</tls:context>
