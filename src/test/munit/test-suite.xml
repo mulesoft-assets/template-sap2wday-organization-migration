@@ -65,7 +65,7 @@ payload.Organization.Organization_Data.Organization_Name]]></ee:set-variable>
 			</ee:transform>
 		</munit:execution>
 		<munit:validation >
-			<munit-tools:assert-that doc:name="Assert that if name of organization has been updated" doc:id="9880da15-f67d-48ba-b337-76a0bf6fa0a3" expression="#[vars.testData]" is="#[MunitTools::equalTo(vars.newData)]"/>
+			<munit-tools:assert-that doc:name="Assert that if name of organization has been updated" doc:id="9880da15-f67d-48ba-b337-76a0bf6fa0a3" expression="#[vars.testData]" is="#[MunitTools::equalTo(vars.newData)]" message="Name of organization wasn't updated"/>
 		</munit:validation>
 	</munit:test>
 	<munit:after-test name="test-suiteAfter_Test" description="After tests actions" doc:id="ae3b2b2a-54cb-43c4-a142-6b2b0ae1ec0b" >
